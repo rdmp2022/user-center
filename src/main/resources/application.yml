@@ -5,13 +5,26 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/user-center
     username: root
-    password: abc123456
+    password: 123456
   session:
-    timeout: 86400
+    timeout: 86400 #两个月
+    store-type: redis
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  #redis
+  redis:
+    port: 6379
+    database: 2
+    host: localhost
+    password: abc123456
 server:
   port: 8080
   servlet:
     context-path: /api
+    session:
+      cookie:
+        domain:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false

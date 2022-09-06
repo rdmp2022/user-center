@@ -17,7 +17,7 @@ public class User implements Serializable {
      * 
      */
     @TableId(type = IdType.AUTO)
-    private Long id;
+    private long id;
 
     /**
      * 用户昵称
@@ -58,6 +58,11 @@ public class User implements Serializable {
      * 电话
      */
     private String phone;
+
+    /**
+     * 标签列表 json
+     */
+    private String tags;
 
     /**
      * 创建时间

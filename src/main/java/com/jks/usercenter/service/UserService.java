@@ -4,6 +4,7 @@ import com.jks.usercenter.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  *
@@ -40,4 +41,31 @@ public interface UserService extends IService<User> {
      * @return
      */
     int userLogout(HttpServletRequest request);
+
+    /**
+     * 根据标签搜索用户
+     *
+     * @param tagNameList
+     * @return
+     */
+    List<User> searchUsersByTags(List<String> tagNameList);
+
+    /**
+     * 更新用户信息
+     *
+     * @param user
+     * @param loginUser
+     * @return
+     */
+    int updateUser(User user, User loginUser);
+
+    /**
+     * 获取当前登录用户信息
+     * @return
+     */
+    User getLoginUser(HttpServletRequest request);
+
+    boolean isAdmin(HttpServletRequest request);
+
+    boolean isAdmin(User loginUser);
 }

@@ -1,7 +1,11 @@
 package com.jks.usercenter.service;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import com.jks.usercenter.model.domain.User;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -73,18 +77,25 @@ public class UserServiceTest {
         Assertions.assertTrue(result > 0);
     }
 
-    @Test
-    void userRegister(){
-        String userAccount = "yddy";
-        String userPassword = "12345678";
-        String checkPassword = "12345678";
-        String planetCode = "2";
-        long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
-        Assertions.assertEquals(-1, result);
-    }
+//    @Test
+//    void userRegister(){
+//        String userAccount = "yddy";
+//        String userPassword = "12345678";
+//        String checkPassword = "12345678";
+//        String planetCode = "2";
+//        long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
+//        Assertions.assertEquals(-1, result);
+//    }
 
     @Test
     void userSearch(){
 
+    }
+
+    @Test
+    void searchUsersByTags() {
+        List<String> tagNameList = Arrays.asList("Java", "Python");
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        Assert.assertNotNull(userList);
     }
 }

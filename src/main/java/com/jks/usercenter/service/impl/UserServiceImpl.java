@@ -11,13 +11,17 @@ import com.jks.usercenter.Mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static com.jks.usercenter.constant.UserConstant.ADMIN_ROLE;
 import static com.jks.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -153,6 +157,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setPhone(originUser.getPhone());
         safetyUser.setCreateTime(originUser.getCreateTime());
         safetyUser.setUpdateTime(originUser.getUpdateTime());
+        safetyUser.setTags(originUser.getTags());
         return safetyUser;
     }
 
@@ -161,6 +166,70 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //移除登录态
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
+    }
+
+    /**
+     * 根据标签搜索用户
+     *
+     * @param tagNameList
+     * @return
+     */
+    @Override
+    public List<User> searchUsersByTags(List<String> tagNameList){
+        if(CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        // 查询
+        // like '%Java%' and like '%Python%'
+        for (String tagName : tagNameList){
+            queryWrapper = queryWrapper.like("tags", tagName);
+        }
+        List<User> userList = userMapper.selectList(queryWrapper);
+        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    @Override
+    public int updateUser(User user, User loginUser) {
+        long userId = loginUser.getId();
+        if (userId <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 1. 判断权限
+        // 如果是管理员，允许更新用户
+        // 如果不是管理员，只允许修改自己的信息
+        if (!isAdmin(loginUser) && userId != loginUser.getId()) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User oldUser = userMapper.selectById(userId);
+        if (oldUser == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        return userMapper.updateById(user);
+    }
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        if (request == null){
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        return (User) userObj;
+    }
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request){
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null && user.getUserRole() == ADMIN_ROLE;
+    }
+
+    @Override
+    public boolean isAdmin(User loginUser){
+        return loginUser != null && loginUser.getUserRole() == ADMIN_ROLE;
     }
 }
 
